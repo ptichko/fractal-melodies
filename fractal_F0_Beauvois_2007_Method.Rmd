@@ -1,0 +1,103 @@
+---
+title: "Fractal_Clicks_MarkDown"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#Generating fractal melodies using the methods described in Beauvois (2007), Music Perception
+#Step 1: Generate fractal timeseries from fractal gaussian noise
+#Step 2: Standardize time series to mean  0, Sd  1
+#Step 3: Expontially scale time series between 0 - 127 for MIDI note values
+#Step 4: Save as a .mat file, and then import into Matlab to create midi file with MIDI Tool box
+
+
+```
+
+
+```{r, message = FALSE, echo=FALSE}
+### Fractal Melodies ###
+
+# Fractal package to simulate fractal time series 
+library(fractal)
+
+#pengFit and rsFit are two modern methods of computing the Hurst Exponent. Both should be used.
+library(fArma)
+
+#Save fractal time series as a .mat file
+library(R.matlab)
+
+####Step 1: Generate Fractal Time Series####
+## Parameters ##
+#mean 100, variance 100 produces mean = 0, sd = 1 when standardized
+var = 100 #variance of distribution
+mu = 100 #mean of distribution
+h = 0.25 #hurst exponent
+n = 2000 #sample size of time series
+
+mod1 = lmModel("fgn", HG = h, variance = var) 
+y<-lmSimulate(mod1,n.sample=n, mean = mu) 
+minval = min(y)
+
+plot(y, main="Fractal Time Series")
+
+#Save hurst exponents
+H.dfa.0<-DFA(y,overlap=0.2,sum.order=0)[1]
+H.dfa.1<- DFA(y,overlap=0.2,sum.order=1)[1]
+H.rs<- rsFit(y)
+H.peng <- pengFit(y)
+
+#Check hurst exponents
+H.dfa.0
+H.dfa.1
+H.rs
+H.peng
+
+
+```
+
+```{r, message = FALSE, echo=FALSE}
+###Step 2: Normalize Time Series, then Convert to MIDI values
+
+#Normalized to mean = 0, sd = 1
+y.scaled = scale(y, center = TRUE, scale = TRUE)
+
+#Exponential scaling used to convert scaled time series to MIDI note values
+#Method described by Beauvois, 2007
+midipitch <- function(x, p) {
+  #Converts a standardized time series (mean 0, sd 1)
+  #to a time series of MIDI note values
+  #x = time series
+  #p = midi note value to standardize around; 60 = middle C
+  #the time series values are truncated just to their integer part
+  
+  temp_x = 0
+  
+  for (i in 1:length(x)) {
+    
+    if (x[i] >= 0) { 
+    temp_x[i] = trunc(p * 2^(x[i]/4))} 
+    
+    else {
+  temp_x[i] = trunc(p - (p * 2^-(x[i]/4) - p))} 
+  }
+
+  return(temp_x)
+}
+
+### Step 3: Exponential scaling around MIDI note value 60 (middle C) ###
+y.MP = midipitch(y.scaled, 60)
+
+  
+```
+
+```{r, message = FALSE, echo=FALSE}
+### Step 4: Save MIDI time series as a .mat file
+#Save time series to .mat file
+y.MP = data.frame(y.MP)
+writeMat("MIDINOTE_TS.mat", TS = y.MP)
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
