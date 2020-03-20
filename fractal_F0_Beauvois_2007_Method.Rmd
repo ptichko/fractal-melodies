@@ -33,7 +33,7 @@ library(R.matlab)
 #mean 100, variance 100 produces mean = 0, sd = 1 when standardized
 var = 100 #variance of distribution
 mu = 100 #mean of distribution
-h = 0.25 #hurst exponent
+h = 0.95 #hurst exponent
 n = 2000 #sample size of time series
 
 mod1 = lmModel("fgn", HG = h, variance = var) 
@@ -96,7 +96,7 @@ y.MP = midipitch(y.scaled, 60)
 ### Step 4: Save MIDI time series as a .mat file
 #Save time series to .mat file
 y.MP = data.frame(y.MP)
-writeMat("MIDINOTE_TS.mat", TS = y.MP)
+writeMat(paste("MIDINOTE_TS_",h,".mat", sep = ""), TS = y.MP)
 
 ```
 
