@@ -8,8 +8,7 @@
 <!-- badges: end -->
 
 A method implemented in R to generate fractal melodies using the method
-described by Beauvois (2007)
-(<https://www.jstor.org/stable/10.1525/mp.2007.24.3.247>). The R script
+described by [Beauvois (2007)](<https://www.jstor.org/stable/10.1525/mp.2007.24.3.247>). The R script
 generates a fractal time series, and then the Matlab script generates a
 MIDI sequence using that time series. The result is a melody with
 self-similar pitch fluctuations. Note: the Matlab script requires the
